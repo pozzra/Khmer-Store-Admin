@@ -5,9 +5,22 @@ import NavUser from '@/components/NavUser.vue';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/vue3';
-import { BookOpen, Folder, LayoutGrid, Users, Contact, BookUser, CalendarDays, CalendarCheck2, School, BookCopy, MessageSquareWarning, GraduationCap    } from 'lucide-vue-next';
-import AppLogo from './AppLogo.vue';
+import {
+    BookCopy,
+    BookOpen,
+    BookUser,
+    CalendarCheck2,
+    CalendarDays,
+    Contact,
+    Folder,
+    GraduationCap,
+    LayoutGrid,
+    MessageSquareWarning,
+    School,
+    Users,
+} from 'lucide-vue-next';
 import { ref, watch } from 'vue';
+import AppLogo from './AppLogo.vue';
 
 // --- Translation logic ---
 const selectedLanguage = ref(localStorage.getItem('language') || 'en');
@@ -17,33 +30,33 @@ watch(selectedLanguage, (newLang) => {
 
 const translations = {
     en: {
-        dashboard: "Dashboard",
-        'manage-admins': "Manage Admins",
-        'manage-students': "Manage Students",
-        'manage-teachers': "Manage Teachers",
-        'manage-courses': "Manage Courses",
-        'manage-subjects': "Manage Subjects",
-        'manage-classes': "Manage Classes",
-        'github-repo': "Github Repo",
-        documentation: "Documentation",
-        repository: "Repository",
-        report: "Report",
-        'Student Registration': "Student Registration",
+        dashboard: 'Dashboard',
+        'manage-admins': 'Manage Admins',
+        'manage-students': 'Manage Students',
+        'manage-teachers': 'Manage Teachers',
+        'manage-courses': 'Manage Courses',
+        'manage-subjects': 'Manage Subjects',
+        'manage-classes': 'Manage Classes',
+        'github-repo': 'Github Repo',
+        documentation: 'Documentation',
+        repository: 'Repository',
+        report: 'Report',
+        'Student Registration': 'Student Registration',
     },
     km: {
-        dashboard: "ផ្ទាំងគ្រប់គ្រង",
-        'manage-admins': "គ្រប់គ្រងអ្នកគ្រប់គ្រង",
-        'manage-students': "គ្រប់គ្រងសិស្ស",
-        'manage-teachers': "គ្រប់គ្រងគ្រូ",
-        'manage-courses': "គ្រប់គ្រងវគ្គសិក្សា",
-        'manage-subjects': "គ្រប់គ្រងមុខវិជ្ជា",
-        'manage-classes': "គ្រប់គ្រងថ្នាក់",
-        'github-repo': "Github Repo",
-        documentation: "ឯកសារ",
-        repository: "ឃ្លាំង",
-        report: "របាយការណ៍",
-        'Student Registration': "ចុះឈ្មោះសិស្ស",
-    }
+        dashboard: 'ផ្ទាំងគ្រប់គ្រង',
+        'manage-admins': 'គ្រប់គ្រងអ្នកគ្រប់គ្រង',
+        'manage-students': 'គ្រប់គ្រងសិស្ស',
+        'manage-teachers': 'គ្រប់គ្រងគ្រូ',
+        'manage-courses': 'គ្រប់គ្រងវគ្គសិក្សា',
+        'manage-subjects': 'គ្រប់គ្រងមុខវិជ្ជា',
+        'manage-classes': 'គ្រប់គ្រងថ្នាក់',
+        'github-repo': 'Github Repo',
+        documentation: 'ឯកសារ',
+        repository: 'ឃ្លាំង',
+        report: 'របាយការណ៍',
+        'Student Registration': 'ចុះឈ្មោះសិស្ស',
+    },
 };
 
 function t(key: string) {
@@ -59,7 +72,7 @@ const mainNavItems: NavItem[] = [
     },
     {
         title: t('manage-admins'),
-        href: '/admins',
+        href: '/admin',
         icon: Users,
     },
     {
@@ -90,9 +103,8 @@ const mainNavItems: NavItem[] = [
     {
         title: t('repository'),
         href: '/repository',
-        icon: BookCopy ,
+        icon: BookCopy,
     },
-    // Add more items as needed
     {
         title: t('report'),
         href: '/report',
@@ -100,8 +112,8 @@ const mainNavItems: NavItem[] = [
     },
     {
         title: t('Student Registration'),
-        href: '/another-item',
-        icon: GraduationCap ,
+        href: '/student-registration',
+        icon: GraduationCap,
     },
 ];
 
