@@ -1,5 +1,3 @@
-# Ecommerce
-# Ecommerce-admin
 ## Project Structure
 
 This document outlines the typical directory structure for the `Ecommerce` and `Ecommerce-admin` projects within this repository.
