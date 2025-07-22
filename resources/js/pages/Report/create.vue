@@ -2,63 +2,70 @@
 import InputError from '@/components/InputError.vue';
 import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/AppLayout.vue';
-import { Head, useForm } from '@inertiajs/vue3';
+import { Head, useForm, router } from '@inertiajs/vue3';
 import { ref } from 'vue';
 
 // --- Translation logic ---
 const selectedLanguage = ref(localStorage.getItem('language') || 'en');
-const translations = {
+const translations: Record<string, Record<string, string>> = {
     en: {
-        createStudent: 'Create Student',
+        createProduct: 'Create Product',
+        mage: 'Image',
         name: 'Name',
-        gender: 'Gender',
-        phone: 'Phone',
-        generation: 'Generation',
-        email: 'Email',
-        address: 'Address',
+        dsc: 'Description',
+        price: 'Price',
         save: 'Save',
         cancel: 'Cancel',
-        success: 'Student created successfully!',
-        selectGender: 'Select gender',
-        male: 'Male',
-        female: 'Female',
+        success: 'Product created successfully!',
     },
     km: {
-        createStudent: 'បង្កើតសិស្ស',
+        createProduct: 'បង្កើតផលិតផល',
+        mage: 'រូបភាព',
         name: 'ឈ្មោះ',
-        gender: 'ភេទ',
-        phone: 'ទូរស័ព្ទ',
-        generation: 'ជំនាន់',
-        email: 'អ៊ីមែល',
-        address: 'ទីតាំង',
+        dsc: 'ការពិពណ៌នា',
+        price: 'តម្លៃ',
         save: 'រក្សាទុក',
         cancel: 'បោះបង់',
-        success: 'បង្កើតសិស្សបានជោគជ័យ!',
-        selectGender: 'ជ្រើសរើសភេទ',
-        male: 'ប្រុស',
-        female: 'ស្រី',
+        success: 'បង្កើតផលិតផលបានជោគជ័យ!',
     },
 };
-function t(key) {
+function t(key: string): string {
     return translations[selectedLanguage.value][key] || key;
 }
 // --- End translation logic ---
 
 const form = useForm({
     name: '',
-    gender: '',
-    phone: '',
-    generation: '',
-    email: '',
-    address: '',
+    dsc: '',
+    price: '',
+    stock: '', // Add stock field
 });
 
+const imageFile = ref<File | null>(null);
 const showSuccess = ref(false);
 
+function onFileChange(event: Event) {
+    const target = event.target as HTMLInputElement;
+    if (target.files && target.files.length > 0) {
+        imageFile.value = target.files[0];
+    }
+}
+
 function submit() {
-    form.post('/students', {
+    const data = new FormData();
+    if (imageFile.value) {
+        data.append('mage', imageFile.value);
+    }
+    data.append('name', form.name);
+    data.append('dsc', form.dsc);
+    data.append('price', form.price);
+    data.append('stock', form.stock); // Send stock
+
+    router.post('/products', data, {
+        forceFormData: true,
         onSuccess: () => {
             form.reset();
+            imageFile.value = null;
             showSuccess.value = true;
         },
     });
@@ -66,14 +73,27 @@ function submit() {
 </script>
 
 <template>
-    <Head :title="t('createStudent')" />
+    <Head :title="t('createProduct')" />
     <AppLayout>
         <div class="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-8 dark:bg-neutral-950">
             <div class="w-full max-w-lg rounded bg-white p-8 shadow-lg dark:bg-neutral-900">
                 <h1 class="mb-8 text-center text-3xl font-bold text-gray-900 dark:text-gray-100">
-                    {{ t('createStudent') }}
+                    {{ t('createProduct') }}
                 </h1>
                 <form @submit.prevent="submit" class="space-y-6">
+                    <div>
+                        <label class="mb-1 block font-medium text-gray-700 dark:text-gray-200">
+                            {{ t('mage') }}
+                        </label>
+                        <input
+                            type="file"
+                            accept="image/*"
+                            @change="onFileChange"
+                            class="w-full rounded border bg-gray-50 p-2 text-gray-900 dark:bg-neutral-800 dark:text-gray-100"
+                            required
+                        />
+                        <InputError :message="form.errors.mage" />
+                    </div>
                     <div>
                         <label class="mb-1 block font-medium text-gray-700 dark:text-gray-200">
                             {{ t('name') }}
@@ -89,70 +109,43 @@ function submit() {
                     </div>
                     <div>
                         <label class="mb-1 block font-medium text-gray-700 dark:text-gray-200">
-                            {{ t('gender') }}
-                        </label>
-                        <select
-                            v-model="form.gender"
-                            class="w-full rounded border bg-gray-50 p-2 text-gray-900 dark:bg-neutral-800 dark:text-gray-100"
-                            required
-                        >
-                            <option value="" disabled>{{ t('selectGender') }}</option>
-                            <option value="male">{{ t('male') }}</option>
-                            <option value="female">{{ t('female') }}</option>
-                        </select>
-                        <InputError :message="form.errors.gender" />
-                    </div>
-                    <div>
-                        <label class="mb-1 block font-medium text-gray-700 dark:text-gray-200">
-                            {{ t('phone') }}
+                            {{ t('dsc') }}
                         </label>
                         <input
-                            v-model="form.phone"
+                            v-model="form.dsc"
                             type="text"
                             class="w-full rounded border bg-gray-50 p-2 text-gray-900 dark:bg-neutral-800 dark:text-gray-100"
                             required
                         />
-                        <InputError :message="form.errors.phone" />
+                        <InputError :message="form.errors.dsc" />
                     </div>
                     <div>
                         <label class="mb-1 block font-medium text-gray-700 dark:text-gray-200">
-                            {{ t('generation') }}
+                            {{ t('price') }}
                         </label>
                         <input
-                            v-model="form.generation"
-                            type="text"
+                            v-model="form.price"
+                            type="number"
                             class="w-full rounded border bg-gray-50 p-2 text-gray-900 dark:bg-neutral-800 dark:text-gray-100"
                             required
                         />
-                        <InputError :message="form.errors.generation" />
+                        <InputError :message="form.errors.price" />
                     </div>
                     <div>
                         <label class="mb-1 block font-medium text-gray-700 dark:text-gray-200">
-                            {{ t('email') }}
+                            Stock
                         </label>
                         <input
-                            v-model="form.email"
-                            type="email"
+                            v-model="form.stock"
+                            type="number"
                             class="w-full rounded border bg-gray-50 p-2 text-gray-900 dark:bg-neutral-800 dark:text-gray-100"
                             required
                         />
-                        <InputError :message="form.errors.email" />
-                    </div>
-                    <div>
-                        <label class="mb-1 block font-medium text-gray-700 dark:text-gray-200">
-                            {{ t('address') }}
-                        </label>
-                        <input
-                            v-model="form.address"
-                            type="text"
-                            class="w-full rounded border bg-gray-50 p-2 text-gray-900 dark:bg-neutral-800 dark:text-gray-100"
-                            required
-                        />
-                        <InputError :message="form.errors.address" />
+                        <InputError :message="form.errors.stock" />
                     </div>
                     <div class="flex justify-end gap-3">
                         <Button class="cursor-pointer" type="submit" :disabled="form.processing">{{ t('save') }}</Button>
-                        <Button class="cursor-pointer" type="button" variant="secondary" @click="$inertia.visit('/students')">
+                        <Button class="cursor-pointer" type="button" variant="secondary" @click="router.visit('/products')">
                             {{ t('cancel') }}
                         </Button>
                     </div>
@@ -167,7 +160,7 @@ function submit() {
                 <Button
                     @click="
                         showSuccess = false;
-                        $inertia.visit('/students');
+                        router.visit('/products');
                     "
                 >
                     OK

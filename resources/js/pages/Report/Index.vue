@@ -2,70 +2,93 @@
 import AppLayout from '@/layouts/AppLayout.vue';
 import { type BreadcrumbItem } from '@/types';
 import { Head, router, usePage } from '@inertiajs/vue3';
-import { Trash2, UserRoundPen, UserRoundPlus } from 'lucide-vue-next';
+import { Trash2, UserRoundPen, PackageSearch, Sheet, FileText    } from 'lucide-vue-next';
 import { computed, ref } from 'vue';
 
 // --- Translation logic ---
 const selectedLanguage = ref(localStorage.getItem('language') || 'en');
-const translations = {
+const translations: Record<string, Record<string, string>> = {
     en: {
-        adminTitle: 'Students Management',
-        adminDesc: 'Manage student users and permissions',
-        addAdmin: 'Add Student',
+        adminTitle: 'Products Management',
+        adminDesc: 'Manage Products and permissions',
+        addAdmin: 'Add Products',
+        iamge: 'Image',
         name: 'Name',
-        gender: 'Gender',
-        phone: 'Phone',
-        email: 'Email',
-        generation: 'Generation',
-        address: 'Address',
+        dsc: 'Dsc',
+        price: 'Price',
         actions: 'Actions',
         edit: 'Edit',
         delete: 'Delete',
         role: 'Role',
         id: 'ID',
-        searchPlaceholder: 'Search students...',
+        searchPlaceholder: 'Search productss...',
+        stock: 'Stock',
+        deleteError: 'Error deleting products',
+        AreYouSure: 'Are you sure you want to delete this products?'
     },
     km: {
-        adminTitle: 'ការគ្រប់គ្រងសិស្ស',
-        adminDesc: 'គ្រប់គ្រងអ្នកប្រើសិស្ស និងសិទ្ធិ',
+        adminTitle: 'ការគ្រប់គ្រងផលិតផល​',
+        adminDesc: 'គ្រប់គ្រងផលិតផល​ និងសិទ្ធិ',
         addAdmin: 'បន្ថែមសិស្ស',
+        iamge: 'រូបភាព',
         name: 'ឈ្មោះ',
-        gender: 'ភេទ',
-        phone: 'ទូរស័ព្ទ',
-        generation: 'ជំនាន់',
-        email: 'អ៊ីមែល',
-        address: 'ទីតាំង',
+        dsc: 'ការពិពណ៌នា',
+        price: 'តម្លៃ',
         actions: 'សកម្មភាព',
         edit: 'កែប្រែ',
         delete: 'លុប',
-        role: 'តួនាទី',
+        role: 'ល.រ',
         id: 'ល.រ',
-        searchPlaceholder: 'ស្វែងរកសិស្ស...',
+        searchPlaceholder: 'ស្វែងរកផលិតផល...',
+        stock: 'ស្តុក',
+        deleteError: 'បញ្ហាក្នុងការលុបផលិតផល',
+        AreYouSure: 'តើអ្នកប្រាកដថាចង់លុបផលិតផលនេះឬ?' 
     },
 };
-function t(key) {
+function t(key: string): string {
     return translations[selectedLanguage.value][key] || key;
 }
 // --- End translation logic ---
 
-const breadcrumbs: BreadcrumbItem[] = [{ title: t('adminTitle'), href: '/students' }];
+const breadcrumbs: BreadcrumbItem[] = [{ title: t('adminTitle'), href: '/productss' }];
 
 const page = usePage();
-const students = ref(page.props.students || []);
+const productss = ref<any[]>(Array.isArray(page.props.productss) ? page.props.productss : []);
 // Search logic
 const search = ref('');
-const filteredStudents = computed(() => students.value.filter((student) => student.name?.toLowerCase().includes(search.value.toLowerCase())));
+const filteredproductss = computed(() => productss.value.filter((products: any) => products.name?.toLowerCase().includes(search.value.toLowerCase())));
 
-function deleteStudent(id) {
-    if (window.confirm(t('Are you sure you want to delete this student?'))) {
-        router.delete(`/students/${id}`, {
+function deleteproducts(id: number) {
+    if (window.confirm(t('AreYouSure'))) {
+        router.delete(`/products/${id}`, {
             onSuccess: () => window.location.reload(),
             onError: (error) => {
-                console.error('Error deleting student:', error);
+                console.error('Error deleting products:', error);
                 alert(t('deleteError'));
             },
         });
     }
+}
+
+const newProduct = ref({ mage: '', name: '', dsc: '', price: 0 });
+
+function createProduct() {
+  router.post('/products', newProduct.value, {
+    onSuccess: () => {
+      window.location.reload(); // or update productss.value
+    },
+    onError: (error) => {
+      alert('Error creating product');
+      console.error(error);
+    }
+  });
+}
+
+function exportExcel() {
+  window.open('/report/export-excel', '_blank');
+}
+function exportPDF() {
+  window.open('/report/export-pdf', '_blank');
 }
 </script>
 
@@ -76,12 +99,30 @@ function deleteStudent(id) {
             <div class="mb-4 flex items-center justify-between">
                 <h1 class="text-2xl font-semibold text-gray-900 dark:text-gray-100">{{ t('adminTitle') }}</h1>
                 <button
-                    @click="$inertia.visit('/students/create')"
+                    @click="router.visit('/products/create')"
                     class="cursor-pointer rounded bg-blue-600 px-3 py-1 text-white transition hover:bg-blue-700 dark:bg-blue-800 dark:hover:bg-blue-700"
                 >
-                    <UserRoundPlus class="inline" />
+                    <PackageSearch  class="inline" />
                     <!-- {{ t('addAdmin') }} -->
                 </button>
+            </div>
+            <div class="mb-4 flex gap-2 items-center justify-between  ">
+                <h1></h1>
+               <div>
+                <button
+                    @click="exportExcel"
+                    class="rounded bg-green-600 px-3 mr-1 py-1 text-white hover:bg-green-700 cursor-pointer "
+                >
+                <Sheet />
+                </button>
+                <button
+                    @click="exportPDF"
+                    class="rounded bg-red-600 px-3 py-1 text-white hover:bg-red-700 cursor-pointer "
+                >
+                    <FileText />
+
+                </button>
+               </div>
             </div>
             <div class="mb-4">
                 <input v-model="search" type="text" :placeholder="t('searchPlaceholder')" class="w-full rounded border p-2 outline-none" />
@@ -94,22 +135,19 @@ function deleteStudent(id) {
                                 {{ t('id') }}
                             </th>
                             <th class="px-6 py-3 text-left text-xs font-semibold tracking-wider text-gray-700 uppercase dark:text-gray-200">
+                                {{ t('image') }}
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-semibold tracking-wider text-gray-700 uppercase dark:text-gray-200">
                                 {{ t('name') }}
                             </th>
                             <th class="px-6 py-3 text-left text-xs font-semibold tracking-wider text-gray-700 uppercase dark:text-gray-200">
-                                {{ t('gender') }}
+                                {{ t('dsc') }}
                             </th>
                             <th class="px-6 py-3 text-left text-xs font-semibold tracking-wider text-gray-700 uppercase dark:text-gray-200">
-                                {{ t('phone') }}
+                                {{ t('price') }}
                             </th>
                             <th class="px-6 py-3 text-left text-xs font-semibold tracking-wider text-gray-700 uppercase dark:text-gray-200">
-                                {{ t('generation') }}
-                            </th>
-                            <th class="px-6 py-3 text-left text-xs font-semibold tracking-wider text-gray-700 uppercase dark:text-gray-200">
-                                {{ t('email') }}
-                            </th>
-                            <th class="px-6 py-3 text-left text-xs font-semibold tracking-wider text-gray-700 uppercase dark:text-gray-200">
-                                {{ t('address') }}
+                                {{ t('stock') }}
                             </th>
                             <th class="px-6 py-3 text-left text-xs font-semibold tracking-wider text-gray-700 uppercase dark:text-gray-200">
                                 {{ t('actions') }}
@@ -117,23 +155,24 @@ function deleteStudent(id) {
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100 dark:divide-neutral-800">
-                        <tr v-for="(student, i) in filteredStudents" :key="student.id" class="transition hover:bg-gray-100 dark:hover:bg-neutral-800">
+                        <tr v-for="(products, i) in filteredproductss" :key="products.id" class="transition hover:bg-gray-100 dark:hover:bg-neutral-800">
                             <td class="px-6 py-4 whitespace-nowrap text-gray-900 dark:text-gray-100">{{ i + 1 }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-gray-900 dark:text-gray-100">{{ student.name }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-gray-900 dark:text-gray-100">{{ student.gender }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-gray-900 dark:text-gray-100">{{ student.phone }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-gray-900 dark:text-gray-100">{{ student.generation }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-gray-900 dark:text-gray-100">{{ student.email }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-gray-900 dark:text-gray-100">{{ student.address }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-gray-900 dark:text-gray-100">
+                                <img :src="`/storage/${products.mage}`" alt="Product Image" class="h-10 w-10 object-cover rounded-full" />
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-gray-900 dark:text-gray-100">{{ products.name }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-gray-900 dark:text-gray-100">{{ products.dsc }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-gray-900 dark:text-gray-100">{{ products.price }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-gray-900 dark:text-gray-100">{{ products.stock }}</td>
                             <td class="flex gap-2 px-6 py-4 whitespace-nowrap">
                                 <button
-                                    @click="$inertia.visit(`/students/${student.id}/edit`)"
+                                    @click="router.visit(`/products/${products.id}/edit`)"
                                     class="cursor-pointer rounded bg-blue-100 p-1 text-blue-600 transition hover:bg-blue-200 dark:bg-blue-900 dark:text-blue-300 dark:hover:bg-blue-800"
                                 >
                                     <UserRoundPen />
                                 </button>
                                 <button
-                                    @click="deleteStudent(student.id)"
+                                    @click="deleteproducts(products.id)"
                                     class="cursor-pointer rounded bg-red-100 p-1 text-red-600 transition hover:bg-red-200 dark:bg-red-900 dark:text-red-300 dark:hover:bg-red-800"
                                 >
                                     <Trash2 />

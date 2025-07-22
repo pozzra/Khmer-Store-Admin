@@ -2,86 +2,108 @@
 import InputError from '@/components/InputError.vue';
 import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/AppLayout.vue';
-import { Head, useForm, usePage } from '@inertiajs/vue3';
+import { Head, useForm, usePage, router } from '@inertiajs/vue3';
 import { ref } from 'vue';
 
 // --- Translation logic ---
 const selectedLanguage = ref(localStorage.getItem('language') || 'en');
-const translations = {
+const translations: Record<string, Record<string, string>> = {
     en: {
-        editStudent: 'Edit Student',
+        editProduct: 'Edit Product',
+        mage: 'Image',
         name: 'Name',
-        email: 'Email',
-        gender: 'Gender',
-        phone: 'Phone',
-        generation: 'Generation',
-        address: 'Address',
+        dsc: 'Description',
+        price: 'Price',
         save: 'Save',
         cancel: 'Cancel',
-        selectGender: 'Select gender',
-        male: 'Male',
-        female: 'Female',
-        success: 'Student updated successfully!',
+        success: 'Product updated successfully!',
     },
     km: {
-        editStudent: 'កែប្រែសិស្ស',
+        editProduct: 'កែប្រែផលិតផល',
+        mage: 'រូបភាព',
         name: 'ឈ្មោះ',
-        email: 'អ៊ីមែល',
-        gender: 'ភេទ',
-        phone: 'ទូរស័ព្ទ',
-        generation: 'ជំនាន់',
-        address: 'ទីតាំង',
+        dsc: 'ការពិពណ៌នា',
+        price: 'តម្លៃ',
         save: 'រក្សាទុក',
         cancel: 'បោះបង់',
-        selectGender: 'ជ្រើសរើសភេទ',
-        male: 'ប្រុស',
-        female: 'ស្រី',
-        success: 'បានកែប្រែសិស្សដោយជោគជ័យ!',
+        success: 'កែប្រែផលិតផលបានជោគជ័យ!',
     },
 };
-function t(key) {
+function t(key: string): string {
     return translations[selectedLanguage.value][key] || key;
 }
 // --- End translation logic ---
 
-// Get the student data from the backend (passed as props)
 const page = usePage();
-const student = page.props.student;
+const product: any = page.props.product;
 
-// Dialog state
 const showSuccess = ref(false);
 
-// Initialize form with student data
-const form = useForm({
-    name: student?.name || '',
-    email: student?.email || '',
-    gender: student?.gender || '',
-    phone: student?.phone || '',
-    generation: student?.generation || '',
-    address: student?.address || '',
+const form = useForm<{ name: string; dsc: string; price: string; stock: string; mage?: File | string }>({
+    name: product?.name || '',
+    dsc: product?.dsc || '',
+    price: product?.price || '',
+    stock: product?.stock || '',
+    mage: product?.mage || '',
 });
 
+const imageFile = ref<File | null>(null);
+
+function onFileChange(event: Event) {
+    const target = event.target as HTMLInputElement;
+    if (target.files && target.files.length > 0) {
+        imageFile.value = target.files[0];
+    }
+}
+
 function submit() {
-    form.put(`/students/${student.id}`, {
+    const data = new FormData();
+    if (imageFile.value) {
+        data.append('mage', imageFile.value);
+    }
+    data.append('name', form.name);
+    data.append('dsc', form.dsc);
+    data.append('price', form.price);
+    data.append('stock', form.stock); // Send stock
+    data.append('_method', 'PUT'); // <-- Add this line
+
+    router.post(`/products/${product.id}`, data, {
+        forceFormData: true,
         onSuccess: () => {
             showSuccess.value = true;
             setTimeout(() => {
                 showSuccess.value = false;
-            }, 3000);
+                router.visit('/products');
+            }, 1500);
         },
     });
 }
 </script>
 
 <template>
-    <Head :title="t('editStudent')" />
+    <Head :title="t('editProduct')" />
     <AppLayout>
         <div class="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-8 dark:bg-neutral-950">
             <div class="w-full max-w-lg rounded bg-white p-8 shadow-lg dark:bg-neutral-900">
                 <h1 class="mb-8 text-center text-3xl font-bold text-gray-900 dark:text-gray-100">
-                    {{ t('editStudent') }}
+                    {{ t('editProduct') }}
                 </h1>
                 <form @submit.prevent="submit" class="cursor-pointer space-y-6">
+                    <div>
+                        <label class="mb-1 block font-medium text-gray-700 dark:text-gray-200">
+                            {{ t('mage') }}
+                        </label>
+                        <div v-if="product.mage" class="mb-2">
+                            <img :src="`/storage/${product.mage}`" alt="Current Image" class="h-16 w-16 object-cover rounded-full" />
+                        </div>
+                        <input
+                            type="file"
+                            accept="image/*"
+                            @change="onFileChange"
+                            class="w-full rounded border bg-gray-50 p-2 text-gray-900 dark:bg-neutral-800 dark:text-gray-100"
+                        />
+                        <InputError :message="form.errors.mage" />
+                    </div>
                     <div>
                         <label class="mb-1 block font-medium text-gray-700 dark:text-gray-200">
                             {{ t('name') }}
@@ -97,71 +119,43 @@ function submit() {
                     </div>
                     <div>
                         <label class="mb-1 block font-medium text-gray-700 dark:text-gray-200">
-                            {{ t('email') }}
+                            {{ t('dsc') }}
                         </label>
                         <input
-                            v-model="form.email"
-                            type="email"
-                            class="w-full rounded border bg-gray-50 p-2 text-gray-900 dark:bg-neutral-800 dark:text-gray-100"
-                            required
-                            autocomplete="off"
-                        />
-                        <InputError :message="form.errors.email" />
-                    </div>
-                    <div>
-                        <label class="mb-1 block font-medium text-gray-700 dark:text-gray-200">
-                            {{ t('gender') }}
-                        </label>
-                        <select
-                            v-model="form.gender"
-                            class="w-full rounded border bg-gray-50 p-2 text-gray-900 dark:bg-neutral-800 dark:text-gray-100"
-                            required
-                        >
-                            <option value="" disabled>{{ t('selectGender') }}</option>
-                            <option value="male">{{ t('male') }}</option>
-                            <option value="female">{{ t('female') }}</option>
-                        </select>
-                        <InputError :message="form.errors.gender" />
-                    </div>
-                    <div>
-                        <label class="mb-1 block font-medium text-gray-700 dark:text-gray-200">
-                            {{ t('phone') }}
-                        </label>
-                        <input
-                            v-model="form.phone"
+                            v-model="form.dsc"
                             type="text"
                             class="w-full rounded border bg-gray-50 p-2 text-gray-900 dark:bg-neutral-800 dark:text-gray-100"
                             required
                         />
-                        <InputError :message="form.errors.phone" />
+                        <InputError :message="form.errors.dsc" />
                     </div>
                     <div>
                         <label class="mb-1 block font-medium text-gray-700 dark:text-gray-200">
-                            {{ t('generation') }}
+                            {{ t('price') }}
                         </label>
                         <input
-                            v-model="form.generation"
-                            type="text"
+                            v-model="form.price"
+                            type="number"
                             class="w-full rounded border bg-gray-50 p-2 text-gray-900 dark:bg-neutral-800 dark:text-gray-100"
                             required
                         />
-                        <InputError :message="form.errors.generation" />
+                        <InputError :message="form.errors.price" />
                     </div>
                     <div>
                         <label class="mb-1 block font-medium text-gray-700 dark:text-gray-200">
-                            {{ t('address') }}
+                            Stock
                         </label>
                         <input
-                            v-model="form.address"
-                            type="text"
+                            v-model="form.stock"
+                            type="number"
                             class="w-full rounded border bg-gray-50 p-2 text-gray-900 dark:bg-neutral-800 dark:text-gray-100"
                             required
                         />
-                        <InputError :message="form.errors.address" />
+                        <InputError :message="form.errors.stock" />
                     </div>
                     <div class="flex justify-end gap-3">
                         <Button class="cursor-pointer" type="submit" :disabled="form.processing">{{ t('save') }}</Button>
-                        <Button class="cursor-pointer" type="button" variant="secondary" @click="$inertia.visit('/students')">
+                        <Button class="cursor-pointer" type="button" variant="secondary" @click="router.visit('/products')">
                             {{ t('cancel') }}
                         </Button>
                     </div>

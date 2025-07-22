@@ -6,10 +6,10 @@ import { ref } from 'vue';
 const selectedLanguage = ref(localStorage.getItem('language') || 'en');
 const translations = {
     en: {
-        appName: "Industrial Technical Institute",
+        appName: "Khmer Store",
     },
     km: {
-        appName: "វិទ្យាស្ថានបច្ចេកទេសឧស្សាហកម្ម ",
+        appName: "ហាងខ្មែរ",
     }
 };
 function t(key: string) {

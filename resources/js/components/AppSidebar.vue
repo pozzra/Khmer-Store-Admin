@@ -18,6 +18,9 @@ import {
     MessageSquareWarning,
     School,
     Users,
+    PackageSearch, 
+    ShoppingCart,
+    Warehouse,
 } from 'lucide-vue-next';
 import { ref, watch } from 'vue';
 import AppLogo from './AppLogo.vue';
@@ -28,29 +31,27 @@ watch(selectedLanguage, (newLang) => {
     localStorage.setItem('language', newLang);
 });
 
-const translations = {
+const translations: Record<string, Record<string, string>> = {
     en: {
         dashboard: 'Dashboard',
         'manage-admins': 'Manage Admins',
-        'manage-students': 'Manage Students',
-        'manage-teachers': 'Manage Teachers',
-        'manage-courses': 'Manage Courses',
-        'manage-subjects': 'Manage Subjects',
-        'manage-classes': 'Manage Classes',
+        'manage-products': 'Manage Products',
+        'manage-stock': 'Manage Stock',
+        'manage-order': 'Manage Order',
+        'manage-repot': 'Manage Reort',
         'github-repo': 'Github Repo',
         documentation: 'Documentation',
         repository: 'Repository',
-        report: 'Report',
+        report: 'report',
         'Student Registration': 'Student Registration',
     },
     km: {
         dashboard: 'ផ្ទាំងគ្រប់គ្រង',
         'manage-admins': 'គ្រប់គ្រងអ្នកគ្រប់គ្រង',
-        'manage-students': 'គ្រប់គ្រងសិស្ស',
-        'manage-teachers': 'គ្រប់គ្រងគ្រូ',
-        'manage-courses': 'គ្រប់គ្រងវគ្គសិក្សា',
-        'manage-subjects': 'គ្រប់គ្រងមុខវិជ្ជា',
-        'manage-classes': 'គ្រប់គ្រងថ្នាក់',
+        'manage-products': 'ផលិតផល​',
+        'manage-stock': 'គ្រប់គ្រងផលិតផល​',
+        'manage-order': 'គ្រប់គ្រងលំដាប់​',
+        'manage-repot': 'របាយការណ៍',
         'github-repo': 'Github Repo',
         documentation: 'ឯកសារ',
         repository: 'ឃ្លាំង',
@@ -76,44 +77,24 @@ const mainNavItems: NavItem[] = [
         icon: Users,
     },
     {
-        title: t('manage-students'),
-        href: '/students',
-        icon: BookUser,
+        title: t('manage-products'),
+        href: '/products',
+        icon: PackageSearch,
     },
     {
-        title: t('manage-teachers'),
-        href: '/teachers',
-        icon: Contact,
+        title: t('stock'),
+        href: '/stock',
+        icon: Warehouse,
     },
     {
-        title: t('manage-courses'),
-        href: '/courses',
-        icon: CalendarDays,
-    },
-    {
-        title: t('manage-subjects'),
-        href: '/subjects',
-        icon: CalendarCheck2,
-    },
-    {
-        title: t('manage-classes'),
-        href: '/classes',
-        icon: School,
-    },
-    {
-        title: t('repository'),
-        href: '/repository',
-        icon: BookCopy,
+        title: t('order'),
+        href: '/order',
+        icon: ShoppingCart,
     },
     {
         title: t('report'),
         href: '/report',
         icon: MessageSquareWarning,
-    },
-    {
-        title: t('Student Registration'),
-        href: '/student-registration',
-        icon: GraduationCap,
     },
 ];
 
